@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+coverage/
+coverage.json
+typechain/
+typechain-types/
+artifacts/
+cache/
+.next/
+out/
+build/
