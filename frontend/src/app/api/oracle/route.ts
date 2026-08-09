@@ -16,6 +16,7 @@ const domain = {
 const types = {
   Claim: [
     { name: 'user', type: 'address' },
+    { name: 'certificateId', type: 'string' },
     { name: 'amount', type: 'uint256' },
     { name: 'nonce', type: 'uint256' },
   ],
@@ -23,18 +24,28 @@ const types = {
 
 export async function POST(req: Request) {
   try {
-    const { userAddress, tonnes, nonce } = await req.json()
+    const { userAddress, certificateId, nonce } = await req.json()
 
-    if (!userAddress || !tonnes || nonce === undefined) {
+    if (!userAddress || !certificateId || nonce === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     // 1. Simulate verifying the real-world Carbon Offset
-    // In a real startup, you would query Verra's API here.
-    console.log(`[ORACLE] Verifying ${tonnes} tonnes of offset for ${userAddress}...`)
+    // Expected format: VERRA-YYYY-TONNES-RANDOM
+    const parts = certificateId.split('-')
+    if (parts.length !== 4 || parts[0] !== 'VERRA') {
+      return NextResponse.json({ error: 'Invalid Certificate Format. Expected: VERRA-YYYY-TONNES-RANDOM' }, { status: 400 })
+    }
+
+    const tonnes = Number(parts[2])
+    if (isNaN(tonnes) || tonnes <= 0) {
+      return NextResponse.json({ error: 'Invalid Tonnes amount in Certificate' }, { status: 400 })
+    }
+
+    console.log(`[ORACLE] Verifying certificate ${certificateId} for ${tonnes} tonnes of offset for ${userAddress}...`)
     
     // 2. Calculate the reward amount
-    const crbAmount = (Number(tonnes) * 100).toString()
+    const crbAmount = (tonnes * 100).toString()
     const parsedAmount = parseUnits(crbAmount, 18)
 
     // 3. Generate the cryptographic signature using the Oracle's Private Key
@@ -51,6 +62,7 @@ export async function POST(req: Request) {
       primaryType: 'Claim',
       message: {
         user: userAddress as `0x${string}`,
+        certificateId,
         amount: parsedAmount,
         nonce: BigInt(nonce),
       },

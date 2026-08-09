@@ -13,7 +13,8 @@ const TOKENS = {
 
 export function OffsetWidget() {
   const { isConnected, address, chainId } = useAccount()
-  const [co2Tonnes, setCo2Tonnes] = useState('')
+  const [certificateId, setCertificateId] = useState('')
+  const [tonnes, setTonnes] = useState(0)
 
   const { data: crbBalance, refetch: refetchBalance } = useReadContract({
     address: TOKENS.CRB.address,
@@ -38,7 +39,8 @@ export function OffsetWidget() {
 
   useEffect(() => {
     if (isSuccess) {
-      setCo2Tonnes('')
+      setCertificateId('')
+      setTonnes(0)
       setIsOracleLoading(false)
       refetchBalance()
       refetchNonce()
@@ -47,8 +49,21 @@ export function OffsetWidget() {
 
   const [isOracleLoading, setIsOracleLoading] = useState(false)
 
+  // When user types in certificate, try to parse tonnes for UI preview
+  useEffect(() => {
+    const parts = certificateId.split('-')
+    if (parts.length === 4 && parts[0] === 'VERRA') {
+      const parsed = Number(parts[2])
+      if (!isNaN(parsed) && parsed > 0) {
+        setTonnes(parsed)
+        return
+      }
+    }
+    setTonnes(0)
+  }, [certificateId])
+
   const handleClaim = async () => {
-    if (!co2Tonnes || nonce === undefined) return
+    if (!certificateId || tonnes <= 0 || nonce === undefined) return
     
     setIsOracleLoading(true)
     
@@ -59,7 +74,7 @@ export function OffsetWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userAddress: address,
-          tonnes: co2Tonnes,
+          certificateId,
           nonce: Number(nonce)
         })
       })
@@ -72,7 +87,7 @@ export function OffsetWidget() {
         address: TOKENS.CRB.address,
         abi: abis.MockToken as any,
         functionName: 'claim',
-        args: [BigInt(data.amount), data.signature as `0x${string}`],
+        args: [certificateId, BigInt(data.amount), data.signature as `0x${string}`],
       })
     } catch (e) {
       console.error(e)
@@ -81,7 +96,7 @@ export function OffsetWidget() {
   }
 
   const isClaiming = isPending || isTxConfirming
-  const estimatedCrb = co2Tonnes ? (Number(co2Tonnes) * 100).toFixed(2) : '0.00'
+  const estimatedCrb = tonnes ? (tonnes * 100).toFixed(2) : '0.00'
 
   return (
     <div className="bg-card p-4 sm:p-6 shadow-[var(--box-shadow-neon-sm)] w-full border border-border relative cyber-chamfer-sm">
@@ -91,24 +106,21 @@ export function OffsetWidget() {
 
       <div className="bg-input p-4 mb-4 border border-border focus-within:border-accent transition-all cyber-chamfer-sm">
         <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
-          <span>CO2 Offset (Tonnes)</span>
-          <span>Proof: Required</span>
+          <span>Carbon Registry Certificate</span>
+          <span>(e.g., VERRA-2026-500-ABC)</span>
         </div>
         <div className="flex justify-between items-center gap-4">
           <input
-            type="number"
-            value={co2Tonnes}
-            onChange={(e) => setCo2Tonnes(e.target.value)}
-            placeholder="0"
-            className="bg-transparent text-3xl font-mono outline-none w-full text-accent"
+            type="text"
+            value={certificateId}
+            onChange={(e) => setCertificateId(e.target.value.toUpperCase())}
+            placeholder="VERRA-YYYY-TONNES-RANDOM"
+            className="bg-transparent text-xl font-mono outline-none w-full text-accent uppercase"
           />
-          <div className="bg-muted border border-border px-3 py-2 font-mono font-bold cyber-chamfer-sm text-sm">
-            TONNES
-          </div>
         </div>
       </div>
 
-      {co2Tonnes && (
+      {tonnes > 0 && (
         <div className="bg-input p-4 mb-6 border border-border cyber-chamfer-sm relative">
           <div className="absolute top-0 left-0 w-1 h-full bg-accent"></div>
           <h3 className="text-xs font-mono text-muted-foreground mb-4 uppercase tracking-widest pl-2">Reward Estimate:</h3>
@@ -130,7 +142,7 @@ export function OffsetWidget() {
       ) : (
         <button 
           onClick={handleClaim}
-          disabled={isClaiming || isOracleLoading || !co2Tonnes || Number(co2Tonnes) <= 0}
+          disabled={isClaiming || isOracleLoading || !certificateId || tonnes <= 0}
           className="w-full bg-accent border-2 border-accent text-background py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer hover:brightness-110 shadow-[var(--box-shadow-neon-lg)] transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground disabled:shadow-none"
         >
           {isOracleLoading ? 'Contacting Oracle...' : isClaiming ? 'Mining Transaction...' : 'Verify Proof & Claim CRB'}

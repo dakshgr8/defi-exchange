@@ -10,8 +10,9 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract MockToken is ERC20, Ownable, EIP712 {
     address public oracleNode;
     mapping(address => uint256) public nonces;
+    mapping(string => bool) public claimedCertificates;
 
-    bytes32 private constant CLAIM_TYPEHASH = keccak256("Claim(address user,uint256 amount,uint256 nonce)");
+    bytes32 private constant CLAIM_TYPEHASH = keccak256("Claim(address user,string certificateId,uint256 amount,uint256 nonce)");
 
     constructor(string memory name, string memory symbol, address initialOwner) 
         ERC20(name, symbol) 
@@ -30,16 +31,22 @@ contract MockToken is ERC20, Ownable, EIP712 {
     }
 
     // Secure claim function: verifies cryptographic signature from the Oracle Server
-    function claim(uint256 amount, bytes memory signature) public {
-        bytes32 structHash = keccak256(abi.encode(CLAIM_TYPEHASH, msg.sender, amount, nonces[msg.sender]));
+    function claim(string memory certificateId, uint256 amount, bytes memory signature) public {
+        require(!claimedCertificates[certificateId], "Certificate already claimed");
+
+        bytes32 structHash = keccak256(abi.encode(
+            CLAIM_TYPEHASH, 
+            msg.sender, 
+            keccak256(bytes(certificateId)), 
+            amount, 
+            nonces[msg.sender]
+        ));
         bytes32 digest = _hashTypedDataV4(structHash);
         
         address signer = ECDSA.recover(digest, signature);
-        console.log("Recovered Signer:", signer);
-        console.log("Oracle Node:", oracleNode);
-        console.log("Expected Hash:", uint256(digest));
         require(signer == oracleNode, "Invalid Oracle Signature");
         
+        claimedCertificates[certificateId] = true;
         nonces[msg.sender]++;
         _mint(msg.sender, amount);
     }
