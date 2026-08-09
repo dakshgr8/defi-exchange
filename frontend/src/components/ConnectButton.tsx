@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 export function ConnectButton() {
   const { address, isConnected, chainId } = useAccount()
-  const { connect } = useConnect()
+  const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
   const { switchChain } = useSwitchChain()
   const router = useRouter()
@@ -46,7 +46,7 @@ export function ConnectButton() {
 
   return (
     <button 
-      onClick={() => connect({ connector: injected() })}
+      onClick={() => connect({ connector: connectors[0] })}
       className="bg-accent border border-accent hover:brightness-110 text-background px-6 py-2 font-mono font-bold uppercase tracking-widest transition-colors shadow-[var(--box-shadow-neon-sm)] cyber-chamfer-sm text-sm"
     >
       Connect Wallet
