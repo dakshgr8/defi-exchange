@@ -87,16 +87,16 @@ export function PriceChart() {
   }, [chartData])
 
   return (
-    <div className="bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-4xl border border-gray-700 mt-8 mb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">ETH / USDC Price</h2>
+    <div className="bg-card p-4 sm:p-6 shadow-[var(--box-shadow-neon-sm)] w-full border border-border mt-8 mb-8 relative">
+      <div className="flex justify-between items-center mb-6 border-b border-border pb-2">
+        <h2 className="text-lg font-bold font-sans tracking-widest text-foreground uppercase">CRB / USDT Price</h2>
       </div>
       {chartData.length === 0 ? (
-        <div className="w-full h-[400px] rounded-xl shadow-inner border border-gray-700 flex items-center justify-center bg-gray-900">
-          <p className="text-gray-500 font-medium">Waiting for Subgraph Data...</p>
+        <div className="w-full h-[400px] bg-input border border-border flex items-center justify-center cyber-chamfer-sm">
+          <p className="text-muted-foreground font-mono tracking-widest uppercase text-sm">WAITING_FOR_SUBGRAPH_DATA...</p>
         </div>
       ) : (
-        <div ref={chartContainerRef} className="w-full rounded-xl overflow-hidden shadow-inner border border-gray-700" />
+        <div ref={chartContainerRef} className="w-full bg-input border border-border cyber-chamfer-sm" />
       )}
     </div>
   )
