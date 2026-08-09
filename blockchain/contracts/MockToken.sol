@@ -13,4 +13,9 @@ contract MockToken is ERC20, Ownable {
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
+
+    // Public claim for the Carbon Offset feature prototype
+    function claim(uint256 amount) public {
+        _mint(msg.sender, amount);
+    }
 }

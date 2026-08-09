@@ -6,7 +6,7 @@ export const config = createConfig({
   chains: [sepolia],
   connectors: [injected()],
   transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.sepolia.org'),
+    [sepolia.id]: http('https://eth-sepolia.g.alchemy.com/v2/alch_huKnDWLOvkABori-v9Qjd'),
   },
   ssr: true,
 })

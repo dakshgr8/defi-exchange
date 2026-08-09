@@ -6,25 +6,27 @@ async function main() {
     const [deployer] = await hre.ethers.getSigners();
     console.log("Deploying contracts with account:", deployer.address);
 
-    // 1. Deploy Mock Tokens
-    console.log("Deploying MockETH...");
+    // 1. Deploy Tokens
+    console.log("Deploying Carbon (CRB)...");
     const MockETH = await hre.ethers.getContractFactory("MockToken");
-    const mockEth = await MockETH.deploy("Mock Ethereum", "mETH", deployer.address);
+    const mockEth = await MockETH.deploy("Carbon", "CRB", deployer.address);
     await mockEth.waitForDeployment();
     const mockEthAddress = await mockEth.getAddress();
-    console.log("MockETH deployed at:", mockEthAddress);
+    console.log("Carbon deployed at:", mockEthAddress);
 
-    console.log("Deploying MockUSDC...");
+    console.log("Deploying USDT...");
     const MockUSDC = await hre.ethers.getContractFactory("MockToken");
-    const mockUsdc = await MockUSDC.deploy("Mock USDC", "mUSDC", deployer.address);
+    const mockUsdc = await MockUSDC.deploy("Tether USD", "USDT", deployer.address);
     await mockUsdc.waitForDeployment();
     const mockUsdcAddress = await mockUsdc.getAddress();
-    console.log("MockUSDC deployed at:", mockUsdcAddress);
+    console.log("USDT deployed at:", mockUsdcAddress);
 
     // Mint a large supply to deployer (1,000,000 tokens with 18 decimals)
     const mintAmount = hre.ethers.parseUnits("1000000", 18);
-    await mockEth.mint(deployer.address, mintAmount);
-    await mockUsdc.mint(deployer.address, mintAmount);
+    const txMint1 = await mockEth.mint(deployer.address, mintAmount);
+    await txMint1.wait();
+    const txMint2 = await mockUsdc.mint(deployer.address, mintAmount);
+    await txMint2.wait();
     console.log("Minted 1,000,000 tokens of each to deployer");
 
     // 2. Deploy Liquidity Pool
@@ -35,16 +37,19 @@ async function main() {
     const poolAddress = await pool.getAddress();
     console.log("Liquidity Pool deployed at:", poolAddress);
 
-    // 3. Seed Initial Liquidity (1 ETH = 2000 USDC)
-    const ethToProvide = hre.ethers.parseUnits("10", 18); // 10 ETH
-    const usdcToProvide = hre.ethers.parseUnits("20000", 18); // 20,000 USDC (2000x ratio)
+    // 3. Seed Initial Liquidity (1 CRB = 5 USDT)
+    const ethToProvide = hre.ethers.parseUnits("1000", 18); // 1000 CRB
+    const usdcToProvide = hre.ethers.parseUnits("5000", 18); // 5000 USDT (5x ratio)
 
     console.log("Approving tokens for liquidity pool...");
-    await mockEth.approve(poolAddress, ethToProvide);
-    await mockUsdc.approve(poolAddress, usdcToProvide);
+    const txApp1 = await mockEth.approve(poolAddress, ethToProvide);
+    await txApp1.wait();
+    const txApp2 = await mockUsdc.approve(poolAddress, usdcToProvide);
+    await txApp2.wait();
 
     console.log("Adding initial liquidity...");
-    await pool.addLiquidity(ethToProvide, usdcToProvide);
+    const txAdd = await pool.addLiquidity(ethToProvide, usdcToProvide);
+    await txAdd.wait();
     console.log("Liquidity seeded successfully!");
 
     // 4. Export Addresses & ABIs to Frontend
