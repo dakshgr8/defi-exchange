@@ -36,7 +36,10 @@ export async function POST(req: Request) {
       'VERRA-2026-100-ALPHA': 100,
       'VERRA-2026-500-BETA': 500,
       'VERRA-2026-1000-GAMMA': 1000,
-      'VERRA-2026-5000-DELTA': 5000
+      'VERRA-2026-5000-DELTA': 5000,
+      'STRAVA-2026-100-CYCLING': 100,
+      'TESLA-2026-500-EV': 500,
+      'PLAID-2026-1000-PURCHASE': 1000
     }
 
     const tonnes = VALID_REGISTRY[certificateId.toUpperCase()]

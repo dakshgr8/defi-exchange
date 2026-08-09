@@ -15,6 +15,8 @@ export function OffsetWidget() {
   const { isConnected, address, chainId } = useAccount()
   const [certificateId, setCertificateId] = useState('')
   const [tonnes, setTonnes] = useState(0)
+  const [activeTab, setActiveTab] = useState<'ENTERPRISE' | 'STRAVA' | 'TESLA' | 'PLAID'>('ENTERPRISE')
+  const [mockConnected, setMockConnected] = useState(false)
 
   const { data: crbBalance, refetch: refetchBalance } = useReadContract({
     address: TOKENS.CRB.address,
@@ -41,6 +43,7 @@ export function OffsetWidget() {
     if (isSuccess) {
       setCertificateId('')
       setTonnes(0)
+      setMockConnected(false)
       setIsOracleLoading(false)
       refetchBalance()
       refetchNonce()
@@ -55,7 +58,10 @@ export function OffsetWidget() {
       'VERRA-2026-100-ALPHA': 100,
       'VERRA-2026-500-BETA': 500,
       'VERRA-2026-1000-GAMMA': 1000,
-      'VERRA-2026-5000-DELTA': 5000
+      'VERRA-2026-5000-DELTA': 5000,
+      'STRAVA-2026-100-CYCLING': 100,
+      'TESLA-2026-500-EV': 500,
+      'PLAID-2026-1000-PURCHASE': 1000
     }
     
     const parsed = VALID_REGISTRY[certificateId.toUpperCase()]
@@ -65,6 +71,13 @@ export function OffsetWidget() {
       setTonnes(0)
     }
   }, [certificateId])
+
+  const handleMockConnect = (integration: 'STRAVA' | 'TESLA' | 'PLAID') => {
+    setMockConnected(true)
+    if (integration === 'STRAVA') setCertificateId('STRAVA-2026-100-CYCLING')
+    if (integration === 'TESLA') setCertificateId('TESLA-2026-500-EV')
+    if (integration === 'PLAID') setCertificateId('PLAID-2026-1000-PURCHASE')
+  }
 
   const handleClaim = async () => {
     if (!certificateId || tonnes <= 0 || nonce === undefined) return
@@ -108,21 +121,67 @@ export function OffsetWidget() {
         <h2 className="text-lg font-bold font-sans tracking-widest text-foreground uppercase">Claim Carbon Offset</h2>
       </div>
 
-      <div className="bg-input p-4 mb-4 border border-border focus-within:border-accent transition-all cyber-chamfer-sm">
-        <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
-          <span>Carbon Registry Certificate</span>
-          <span>(e.g., VERRA-2026-500-ABC)</span>
-        </div>
-        <div className="flex justify-between items-center gap-4">
-          <input
-            type="text"
-            value={certificateId}
-            onChange={(e) => setCertificateId(e.target.value.toUpperCase())}
-            placeholder="VERRA-YYYY-TONNES-RANDOM"
-            className="bg-transparent text-xl font-mono outline-none w-full text-accent uppercase"
-          />
-        </div>
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 custom-scrollbar">
+        {['ENTERPRISE', 'STRAVA', 'TESLA', 'PLAID'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setActiveTab(tab as any)
+              setCertificateId('')
+              setTonnes(0)
+              setMockConnected(false)
+            }}
+            className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${
+              activeTab === tab 
+                ? 'bg-accent text-background border-accent shadow-[var(--box-shadow-neon-sm)]' 
+                : 'bg-muted text-muted-foreground border-border hover:bg-input hover:text-foreground'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
+
+      {activeTab === 'ENTERPRISE' ? (
+        <div className="bg-input p-4 mb-4 border border-border focus-within:border-accent transition-all cyber-chamfer-sm">
+          <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
+            <span>Carbon Registry Certificate</span>
+            <span>(e.g., VERRA-2026-500-ABC)</span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <input
+              type="text"
+              value={certificateId}
+              onChange={(e) => setCertificateId(e.target.value.toUpperCase())}
+              placeholder="VERRA-YYYY-TONNES-RANDOM"
+              className="bg-transparent text-xl font-mono outline-none w-full text-accent uppercase"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="bg-input p-4 mb-4 border border-border cyber-chamfer-sm flex flex-col items-center justify-center py-8">
+          {!mockConnected ? (
+            <>
+              <p className="text-muted-foreground font-mono text-sm mb-4 text-center">
+                Connect your {activeTab} account to automatically verify your green behavior.
+              </p>
+              <button 
+                onClick={() => handleMockConnect(activeTab)}
+                className="bg-accent/20 border border-accent text-accent px-6 py-2 font-mono font-bold uppercase tracking-widest hover:bg-accent hover:text-background transition-all"
+              >
+                Connect {activeTab}
+              </button>
+            </>
+          ) : (
+            <div className="text-center">
+              <p className="text-accent font-mono font-bold text-lg mb-2 uppercase tracking-widest">Connected & Verified!</p>
+              <p className="text-muted-foreground font-mono text-sm">
+                Generated Proof: {certificateId}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {tonnes > 0 && (
         <div className="bg-input p-4 mb-6 border border-border cyber-chamfer-sm relative">
