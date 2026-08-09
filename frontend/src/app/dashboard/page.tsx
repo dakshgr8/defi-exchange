@@ -7,10 +7,11 @@ import { SwapWidget } from "@/components/SwapWidget"
 import { LiquidityWidget } from "@/components/LiquidityWidget"
 import { RemoveWidget } from "@/components/RemoveWidget"
 import { OffsetWidget } from "@/components/OffsetWidget"
+import { RetireWidget } from "@/components/RetireWidget"
 import { PriceChart } from "@/components/PriceChart"
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'swap' | 'liquidity' | 'remove' | 'offset'>('offset')
+  const [activeTab, setActiveTab] = useState<'swap' | 'liquidity' | 'remove' | 'offset' | 'retire'>('offset')
 
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col items-center">
@@ -59,7 +60,7 @@ export default function Dashboard() {
           <div className="flex bg-card p-1 cyber-chamfer w-full border border-border relative">
             <button
               onClick={() => setActiveTab('swap')}
-              className={`flex-1 py-3 text-xs sm:text-sm font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
                 activeTab === 'swap' 
                   ? 'bg-accent text-background shadow-[var(--box-shadow-neon-sm)]' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -69,7 +70,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => setActiveTab('liquidity')}
-              className={`flex-1 py-3 text-xs sm:text-sm font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
                 activeTab === 'liquidity' 
                   ? 'bg-accent-tertiary text-background shadow-[var(--box-shadow-neon-tertiary)]' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -79,7 +80,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => setActiveTab('offset')}
-              className={`flex-1 py-3 text-xs sm:text-sm font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
                 activeTab === 'offset'
                   ? 'bg-accent text-background shadow-[var(--box-shadow-neon-sm)]'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -88,8 +89,18 @@ export default function Dashboard() {
               Offset
             </button>
             <button
+              onClick={() => setActiveTab('retire')}
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+                activeTab === 'retire'
+                  ? 'bg-destructive text-background shadow-[0_0_10px_#ff336660]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              Retire
+            </button>
+            <button
               onClick={() => setActiveTab('remove')}
-              className={`flex-1 py-3 text-xs sm:text-sm font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
                 activeTab === 'remove' 
                   ? 'bg-destructive text-background shadow-[0_0_10px_#ff336660]' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -105,6 +116,7 @@ export default function Dashboard() {
             {activeTab === 'liquidity' && <LiquidityWidget />}
             {activeTab === 'remove' && <RemoveWidget />}
             {activeTab === 'offset' && <OffsetWidget />}
+            {activeTab === 'retire' && <RetireWidget />}
           </div>
         </div>
       </div>

@@ -12,6 +12,8 @@ contract MockToken is ERC20, Ownable, EIP712 {
     mapping(address => uint256) public nonces;
     mapping(string => bool) public claimedCertificates;
 
+    event CarbonRetired(address indexed user, uint256 amount, string note);
+
     bytes32 private constant CLAIM_TYPEHASH = keccak256("Claim(address user,string certificateId,uint256 amount,uint256 nonce)");
 
     constructor(string memory name, string memory symbol, address initialOwner) 
@@ -49,5 +51,11 @@ contract MockToken is ERC20, Ownable, EIP712 {
         claimedCertificates[certificateId] = true;
         nonces[msg.sender]++;
         _mint(msg.sender, amount);
+    }
+
+    // Users can permanently burn their carbon tokens to claim the real-world environmental benefit
+    function retire(uint256 amount, string memory note) public {
+        _burn(msg.sender, amount);
+        emit CarbonRetired(msg.sender, amount, note);
     }
 }
