@@ -11,3 +11,4 @@ cache/
 .next/
 out/
 build/
+.vercel
