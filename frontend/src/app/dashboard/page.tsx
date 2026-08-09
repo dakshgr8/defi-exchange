@@ -54,77 +54,73 @@ export default function Dashboard() {
       {/* ─── Main Content ─── */}
       <div className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-8 py-6 sm:py-10">
         
-        {/* ─── Price Chart — Full Width ─── */}
-        <div className="w-full mb-8 bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg">
-          <div className="flex items-center justify-between px-5 py-3 bg-muted/50 border-b border-border/30">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-destructive/80"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-accent/80"></div>
-              </div>
-              <span className="text-sm font-sans font-bold text-foreground tracking-wide">CRB / USDT</span>
-              <span className="text-xs font-mono text-muted-foreground">Live Price</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-              <span className="text-xs font-mono text-accent">LIVE</span>
-            </div>
-          </div>
-          <div className="p-2 sm:p-4">
-            <PriceChart />
-          </div>
-        </div>
-
-        {/* ─── Tab Navigation + Widget ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
           
-          {/* Left: Tab Navigation */}
-          <div className="lg:col-span-4 xl:col-span-3">
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg sticky top-[80px]">
-              <div className="px-5 py-3 bg-muted/50 border-b border-border/30">
-                <h3 className="text-xs font-sans font-bold text-muted-foreground uppercase tracking-[0.2em]">Actions</h3>
+          {/* Left Column: Navigation & Info (Sticky) */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="sticky top-[80px] flex flex-col gap-6">
+              
+              {/* Tab Navigation */}
+              <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg">
+                <div className="px-5 py-3 bg-muted/50 border-b border-border/30">
+                  <h3 className="text-xs font-sans font-bold text-muted-foreground uppercase tracking-[0.2em]">Actions</h3>
+                </div>
+                <div className="p-2">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 mb-1 rounded-lg font-mono text-sm transition-all duration-200 ${
+                        activeTab === tab.id
+                          ? 'bg-accent/15 text-accent border border-accent/30 shadow-[inset_0_0_20px_rgba(0,255,136,0.05)]'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'
+                      }`}
+                    >
+                      <span className="text-lg">{tab.icon}</span>
+                      <div className="text-left">
+                        <div className={`font-bold uppercase tracking-wider text-xs ${activeTab === tab.id ? 'text-accent' : ''}`}>{tab.label}</div>
+                        <div className="text-[10px] text-muted-foreground">{tab.desc}</div>
+                      </div>
+                      {activeTab === tab.id && (
+                        <div className="ml-auto w-1.5 h-8 bg-accent rounded-full shadow-[0_0_8px_#00ff88]"></div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="p-2">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 mb-1 rounded-lg font-mono text-sm transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? 'bg-accent/15 text-accent border border-accent/30 shadow-[inset_0_0_20px_rgba(0,255,136,0.05)]'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'
-                    }`}
-                  >
-                    <span className="text-lg">{tab.icon}</span>
-                    <div className="text-left">
-                      <div className={`font-bold uppercase tracking-wider text-xs ${activeTab === tab.id ? 'text-accent' : ''}`}>{tab.label}</div>
-                      <div className="text-[10px] text-muted-foreground">{tab.desc}</div>
-                    </div>
-                    {activeTab === tab.id && (
-                      <div className="ml-auto w-1.5 h-8 bg-accent rounded-full shadow-[0_0_8px_#00ff88]"></div>
-                    )}
-                  </button>
-                ))}
+
+              {/* Price Chart (Mini Widget) */}
+              <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg">
+                <div className="flex items-center justify-between px-5 py-3 bg-muted/50 border-b border-border/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-sans font-bold text-foreground tracking-wide">CRB / USDT</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <PriceChart />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right: Active Widget */}
-          <div className="lg:col-span-8 xl:col-span-9">
-            <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg">
-              <div className="flex items-center gap-3 px-5 py-3 bg-muted/50 border-b border-border/30">
-                <span className="text-lg">{TABS.find(t => t.id === activeTab)?.icon}</span>
+          {/* Right Column: Active Widget (Huge) */}
+          <div className="lg:col-span-8">
+            <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg min-h-[600px] flex flex-col">
+              <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border/30">
+                <span className="text-2xl">{TABS.find(t => t.id === activeTab)?.icon}</span>
                 <div>
-                  <h2 className="text-sm font-sans font-bold text-foreground uppercase tracking-wide">
+                  <h2 className="text-lg font-sans font-bold text-foreground uppercase tracking-wide">
                     {TABS.find(t => t.id === activeTab)?.label}
                   </h2>
-                  <p className="text-[10px] font-mono text-muted-foreground">
+                  <p className="text-xs font-mono text-muted-foreground">
                     {TABS.find(t => t.id === activeTab)?.desc}
                   </p>
                 </div>
               </div>
-              <div className="p-4 sm:p-6">
+              <div className="p-6 sm:p-8 flex-1">
                 {activeTab === 'swap' && <SwapWidget />}
                 {activeTab === 'liquidity' && <LiquidityWidget />}
                 {activeTab === 'remove' && <RemoveWidget />}
