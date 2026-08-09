@@ -78,8 +78,9 @@ export function PriceChart() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
               <XAxis dataKey="time" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} domain={['dataMin - 1', 'dataMax + 1']} />
+              <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(2)}`} domain={['dataMin - 1', 'dataMax + 1']} />
               <Tooltip 
+                formatter={(value: number) => [`$${value.toFixed(4)}`, 'Price']}
                 contentStyle={{ backgroundColor: '#111', borderColor: '#333', color: '#10b981' }}
                 itemStyle={{ color: '#10b981' }}
               />
