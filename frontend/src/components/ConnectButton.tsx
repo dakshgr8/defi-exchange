@@ -4,8 +4,15 @@ import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { sepolia } from 'wagmi/chains'
 import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 export function ConnectButton() {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { address, isConnected, chainId } = useAccount()
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
@@ -15,6 +22,17 @@ export function ConnectButton() {
   const handleDisconnect = () => {
     disconnect()
     router.push('/')
+  }
+
+  if (!mounted) {
+    return (
+      <button 
+        disabled
+        className="bg-accent/50 border border-accent/50 text-background/50 px-6 py-2 font-mono font-bold uppercase tracking-widest rounded-lg text-sm z-50 relative"
+      >
+        Loading...
+      </button>
+    )
   }
 
   if (isConnected) {
