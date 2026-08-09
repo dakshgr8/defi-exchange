@@ -46,7 +46,7 @@ export function ConnectButton() {
 
   return (
     <button 
-      onClick={() => connect({ connector: connectors.find(c => c.id === 'injected') || connectors[0] })}
+      onClick={() => connect({ connector: injected() })}
       className="bg-accent border border-accent hover:brightness-110 text-background px-6 py-2 font-mono font-bold uppercase tracking-widest transition-colors shadow-[var(--box-shadow-neon-sm)] rounded-lg text-sm cursor-pointer z-50 relative"
     >
       Connect Wallet
