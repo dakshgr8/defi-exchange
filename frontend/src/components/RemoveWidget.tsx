@@ -7,8 +7,8 @@ import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
 
 const TOKENS = {
-  ETH: { decimals: 18, symbol: 'ETH' },
-  USDC: { decimals: 18, symbol: 'USDC' }
+  ETH: { decimals: 18, symbol: 'CRB' },
+  USDC: { decimals: 18, symbol: 'USDT' }
 }
 
 export function RemoveWidget() {
