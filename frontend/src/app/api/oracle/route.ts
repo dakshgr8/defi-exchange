@@ -30,16 +30,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // 1. Simulate verifying the real-world Carbon Offset
-    // Expected format: VERRA-YYYY-TONNES-RANDOM
-    const parts = certificateId.split('-')
-    if (parts.length !== 4 || parts[0] !== 'VERRA') {
-      return NextResponse.json({ error: 'Invalid Certificate Format. Expected: VERRA-YYYY-TONNES-RANDOM' }, { status: 400 })
+    // 1. Check against the Mock Registry Database
+    // In a real startup, you would query Verra's enterprise API here.
+    const VALID_REGISTRY: Record<string, number> = {
+      'VERRA-2026-100-ALPHA': 100,
+      'VERRA-2026-500-BETA': 500,
+      'VERRA-2026-1000-GAMMA': 1000,
+      'VERRA-2026-5000-DELTA': 5000
     }
 
-    const tonnes = Number(parts[2])
-    if (isNaN(tonnes) || tonnes <= 0) {
-      return NextResponse.json({ error: 'Invalid Tonnes amount in Certificate' }, { status: 400 })
+    const tonnes = VALID_REGISTRY[certificateId.toUpperCase()]
+    
+    if (!tonnes) {
+      return NextResponse.json({ 
+        error: 'Invalid or Unrecognized Certificate ID. Please verify with the registry.' 
+      }, { status: 400 })
     }
 
     console.log(`[ORACLE] Verifying certificate ${certificateId} for ${tonnes} tonnes of offset for ${userAddress}...`)

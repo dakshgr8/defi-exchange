@@ -51,15 +51,19 @@ export function OffsetWidget() {
 
   // When user types in certificate, try to parse tonnes for UI preview
   useEffect(() => {
-    const parts = certificateId.split('-')
-    if (parts.length === 4 && parts[0] === 'VERRA') {
-      const parsed = Number(parts[2])
-      if (!isNaN(parsed) && parsed > 0) {
-        setTonnes(parsed)
-        return
-      }
+    const VALID_REGISTRY: Record<string, number> = {
+      'VERRA-2026-100-ALPHA': 100,
+      'VERRA-2026-500-BETA': 500,
+      'VERRA-2026-1000-GAMMA': 1000,
+      'VERRA-2026-5000-DELTA': 5000
     }
-    setTonnes(0)
+    
+    const parsed = VALID_REGISTRY[certificateId.toUpperCase()]
+    if (parsed) {
+      setTonnes(parsed)
+    } else {
+      setTonnes(0)
+    }
   }, [certificateId])
 
   const handleClaim = async () => {
