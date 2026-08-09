@@ -24,6 +24,18 @@ contract LiquidityPool is ERC20 {
 
     uint256 private constant MINIMUM_LIQUIDITY = 10**3;
     
+    event Mint(address indexed sender, uint256 amount0, uint256 amount1);
+    event Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to);
+    event Swap(
+        address indexed sender,
+        uint256 amount0In,
+        uint256 amount1In,
+        uint256 amount0Out,
+        uint256 amount1Out,
+        address indexed to
+    );
+    event Sync(uint256 reserve0, uint256 reserve1);
+    
     // Custom reentrancy guard
     uint256 private unlocked = 1;
     modifier lock() {
@@ -51,6 +63,7 @@ contract LiquidityPool is ERC20 {
         reserve0 = balance0;
         reserve1 = balance1;
         blockTimestampLast = blockTimestamp;
+        emit Sync(reserve0, reserve1);
     }
 
     // 2. Core Function 1: Adding Liquidity
@@ -101,6 +114,8 @@ contract LiquidityPool is ERC20 {
 
         _mint(msg.sender, shares);
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)), _reserve0, _reserve1);
+        
+        emit Mint(msg.sender, actualAmount0, actualAmount1);
     }
 
     // 3. Core Function 2: Swapping
@@ -151,6 +166,12 @@ contract LiquidityPool is ERC20 {
         require(reserve0Adjusted * reserve1Adjusted >= _reserve0 * _reserve1 * (1000**2), "K invariant failed");
 
         _update(balance0, balance1, _reserve0, _reserve1);
+
+        uint256 amount0In = isToken0 ? actualAmountIn : 0;
+        uint256 amount1In = isToken0 ? 0 : actualAmountIn;
+        uint256 amount0Out = isToken0 ? 0 : amountOut;
+        uint256 amount1Out = isToken0 ? amountOut : 0;
+        emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, msg.sender);
     }
 
     // 4. Core Function 3: Removing Liquidity
@@ -175,6 +196,8 @@ contract LiquidityPool is ERC20 {
         require(token1.transfer(msg.sender, amount1), "Transfer1 failed");
 
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)), _reserve0, _reserve1);
+        
+        emit Burn(msg.sender, amount0, amount1, msg.sender);
     }
 
     // 5. Utility: Sync Reserves
