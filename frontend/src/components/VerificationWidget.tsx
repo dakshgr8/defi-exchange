@@ -96,14 +96,15 @@ export function VerificationWidget() {
         address: (addresses as any).mockEthAddress,
         abi: (abis as any).MockToken,
         functionName: 'voteOnClaim',
-        args: [claimId, voteYes]
+        args: [BigInt(claimId), voteYes]
       })
       setMessage('WAITING_FOR_CONFIRMATION...')
       await publicClient?.waitForTransactionReceipt({ hash: tx })
       setMessage('VOTE_CAST_SUCCESSFULLY!')
     } catch (err: any) {
       console.error(err)
-      setMessage(`ERROR: ${err.message.substring(0, 40)}...`)
+      const shortMsg = err?.shortMessage || err?.message || 'Unknown error'
+      setMessage(`ERROR: ${shortMsg.substring(0, 100)}`)
     }
     setLoading(false)
   }
@@ -116,14 +117,15 @@ export function VerificationWidget() {
         address: (addresses as any).mockEthAddress,
         abi: (abis as any).MockToken,
         functionName: 'processClaim',
-        args: [claimId]
+        args: [BigInt(claimId)]
       })
       setMessage('WAITING_FOR_CONFIRMATION...')
       await publicClient?.waitForTransactionReceipt({ hash: tx })
       setMessage('CLAIM_PROCESSED_SUCCESSFULLY!')
     } catch (err: any) {
       console.error(err)
-      setMessage(`ERROR: ${err.message.substring(0, 40)}...`)
+      const shortMsg = err?.shortMessage || err?.message || 'Unknown error'
+      setMessage(`ERROR: ${shortMsg.substring(0, 100)}`)
     }
     setLoading(false)
   }
