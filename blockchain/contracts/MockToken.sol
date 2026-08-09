@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -34,6 +35,9 @@ contract MockToken is ERC20, Ownable, EIP712 {
         bytes32 digest = _hashTypedDataV4(structHash);
         
         address signer = ECDSA.recover(digest, signature);
+        console.log("Recovered Signer:", signer);
+        console.log("Oracle Node:", oracleNode);
+        console.log("Expected Hash:", uint256(digest));
         require(signer == oracleNode, "Invalid Oracle Signature");
         
         nonces[msg.sender]++;
