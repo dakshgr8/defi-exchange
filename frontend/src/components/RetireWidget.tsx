@@ -12,7 +12,7 @@ export function RetireWidget() {
   const [retireNote, setRetireNote] = useState('Offsetting company flights')
 
   const { data: crbBalance, refetch: refetchBalance } = useReadContract({
-    address: addresses.Carbon as `0x${string}`,
+    address: (addresses as any).mockEthAddress as `0x${string}`,
     abi: (abis as any).MockToken,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
@@ -29,7 +29,7 @@ export function RetireWidget() {
     if (!retireAmount || !address) return
     
     writeContract({
-      address: addresses.Carbon as `0x${string}`,
+      address: (addresses as any).mockEthAddress as `0x${string}`,
       abi: (abis as any).MockToken,
       functionName: 'retire',
       args: [parseUnits(retireAmount, 18), retireNote],
