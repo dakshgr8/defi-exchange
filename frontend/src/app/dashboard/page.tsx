@@ -18,6 +18,7 @@ const TABS = [
   { id: 'offset', label: 'Offset', icon: '🌿', desc: 'Claim Credits' },
   { id: 'retire', label: 'Retire', icon: '🔥', desc: 'Burn Carbon' },
   { id: 'verify', label: 'DAO', icon: '🗳️', desc: 'Peer Verify' },
+  { id: 'stats', label: 'Stats', icon: '📈', desc: 'Price Chart' },
 ] as const
 
 type TabId = typeof TABS[number]['id']
@@ -89,20 +90,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Price Chart (Mini Widget) */}
-              <div className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-lg">
-                <div className="flex items-center justify-between px-5 py-3 bg-muted/50 border-b border-border/30">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-sans font-bold text-foreground tracking-wide">CRB / USDT</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="p-3">
-                  <PriceChart />
-                </div>
-              </div>
             </div>
           </div>
 
@@ -127,6 +114,11 @@ export default function Dashboard() {
                 {activeTab === 'offset' && <OffsetWidget />}
                 {activeTab === 'retire' && <RetireWidget />}
                 {activeTab === 'verify' && <VerificationWidget />}
+                {activeTab === 'stats' && (
+                  <div className="flex flex-col items-center justify-center h-full w-full">
+                    <PriceChart />
+                  </div>
+                )}
               </div>
             </div>
           </div>
