@@ -22,6 +22,15 @@ export function OffsetWidget() {
     query: { enabled: !!address }
   })
 
+  // Read Nonce for Signature
+  const { data: nonce, refetch: refetchNonce } = useReadContract({
+    address: TOKENS.CRB.address,
+    abi: abis.MockToken,
+    functionName: 'nonces',
+    args: [address],
+    query: { enabled: !!address }
+  })
+
   // Write Layer
   const { writeContract, data: hash, isPending } = useWriteContract()
   const { isLoading: isTxConfirming, isSuccess } = useWaitForTransactionReceipt({ hash })
@@ -29,22 +38,45 @@ export function OffsetWidget() {
   useEffect(() => {
     if (isSuccess) {
       setCo2Tonnes('')
+      setIsOracleLoading(false)
       refetchBalance()
+      refetchNonce()
     }
-  }, [isSuccess, refetchBalance])
+  }, [isSuccess, refetchBalance, refetchNonce])
 
-  const handleClaim = () => {
-    if (!co2Tonnes) return
-    // 1 Tonne of CO2 = 100 CRB tokens
-    const crbAmount = (Number(co2Tonnes) * 100).toString()
-    const parsedAmount = parseUnits(crbAmount, TOKENS.CRB.decimals)
+  const [isOracleLoading, setIsOracleLoading] = useState(false)
 
-    writeContract({
-      address: TOKENS.CRB.address,
-      abi: abis.MockToken as any,
-      functionName: 'claim',
-      args: [parsedAmount],
-    })
+  const handleClaim = async () => {
+    if (!co2Tonnes || nonce === undefined) return
+    
+    setIsOracleLoading(true)
+    
+    try {
+      // 1. Ask Oracle for Signature
+      const res = await fetch('/api/oracle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAddress: address,
+          tonnes: co2Tonnes,
+          nonce: Number(nonce)
+        })
+      })
+      
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      // 2. Submit Signature to Blockchain
+      writeContract({
+        address: TOKENS.CRB.address,
+        abi: abis.MockToken as any,
+        functionName: 'claim',
+        args: [BigInt(data.amount), data.signature as `0x${string}`],
+      })
+    } catch (e) {
+      console.error(e)
+      setIsOracleLoading(false)
+    }
   }
 
   const isClaiming = isPending || isTxConfirming
@@ -93,10 +125,10 @@ export function OffsetWidget() {
       ) : (
         <button 
           onClick={handleClaim}
-          disabled={isClaiming || !co2Tonnes || Number(co2Tonnes) <= 0}
+          disabled={isClaiming || isOracleLoading || !co2Tonnes || Number(co2Tonnes) <= 0}
           className="w-full bg-accent border-2 border-accent text-background py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer hover:brightness-110 shadow-[var(--box-shadow-neon-lg)] transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground disabled:shadow-none"
         >
-          {isClaiming ? 'Verifying Proof & Minting...' : 'Verify Proof & Claim CRB'}
+          {isOracleLoading ? 'Contacting Oracle...' : isClaiming ? 'Mining Transaction...' : 'Verify Proof & Claim CRB'}
         </button>
       )}
 
