@@ -91,8 +91,8 @@ export function LiquidityWidget() {
   const parsed0 = amount0 ? safeParseUnits(amount0, TOKENS.ETH.decimals) : 0n
   const parsed1 = amount1 ? safeParseUnits(amount1, TOKENS.USDC.decimals) : 0n
 
-  const needsApprove0 = allowance0 !== undefined && allowance0 < parsed0
-  const needsApprove1 = allowance1 !== undefined && allowance1 < parsed1
+  const needsApprove0 = allowance0 !== undefined && (allowance0 as bigint) < parsed0
+  const needsApprove1 = allowance1 !== undefined && (allowance1 as bigint) < parsed1
 
   const handleApprove0 = () => writeApprove0({ address: TOKENS.ETH.address, abi: abis.MockToken, functionName: 'approve', args: [addresses.poolAddress as `0x${string}`, parsed0] })
   const handleApprove1 = () => writeApprove1({ address: TOKENS.USDC.address, abi: abis.MockToken, functionName: 'approve', args: [addresses.poolAddress as `0x${string}`, parsed1] })

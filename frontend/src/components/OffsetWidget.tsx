@@ -41,7 +41,7 @@ export function OffsetWidget() {
 
     writeContract({
       address: TOKENS.CRB.address,
-      abi: abis.MockToken,
+      abi: abis.MockToken as any,
       functionName: 'claim',
       args: [parsedAmount],
     })

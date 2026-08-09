@@ -93,7 +93,7 @@ export function SwapWidget() {
   }, [isSwapSuccess, refetchAllowance, refetchReserves])
 
   const parsedInput = inputAmount ? parseUnits(inputAmount, tokenIn.decimals) : 0n
-  const needsApproval = allowance !== undefined && allowance < parsedInput
+  const needsApproval = allowance !== undefined && (allowance as bigint) < parsedInput
 
   const isApproving = isApprovingReq || isApprovingTx
   const isSwapping = isSwappingReq || isSwappingTx
