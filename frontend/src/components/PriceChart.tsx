@@ -12,7 +12,7 @@ import {
 } from 'recharts'
 import { request, gql } from 'graphql-request'
 
-const SUBGRAPH_URL = 'https://api.studio.thegraph.com/query/1757571/carbon-dex-subgraph/v1.0.2'
+const SUBGRAPH_URL = 'https://api.studio.thegraph.com/query/1757571/carbon-dex-subgraph/v1.0.4'
 
 const GET_SWAPS = gql`
   {
