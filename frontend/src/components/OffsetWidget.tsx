@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
+import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
@@ -11,7 +12,7 @@ const TOKENS = {
 }
 
 export function OffsetWidget() {
-  const { isConnected, address } = useAccount()
+  const { isConnected, address, chainId } = useAccount()
   const [co2Tonnes, setCo2Tonnes] = useState('')
 
   const { data: crbBalance, refetch: refetchBalance } = useReadContract({
@@ -121,6 +122,10 @@ export function OffsetWidget() {
       {!isConnected ? (
         <button disabled className="w-full bg-muted border-2 border-border text-muted-foreground py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer">
           Connect Wallet
+        </button>
+      ) : chainId !== sepolia.id ? (
+        <button disabled className="w-full bg-destructive/20 border-2 border-destructive text-destructive py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer">
+          Wrong Network
         </button>
       ) : (
         <button 

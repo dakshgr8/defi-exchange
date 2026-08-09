@@ -1,13 +1,15 @@
 'use client'
 
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 import { injected } from 'wagmi/connectors'
+import { sepolia } from 'wagmi/chains'
 import { useRouter } from 'next/navigation'
 
 export function ConnectButton() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, chainId } = useAccount()
   const { connect } = useConnect()
   const { disconnect } = useDisconnect()
+  const { switchChain } = useSwitchChain()
   const router = useRouter()
 
   const handleDisconnect = () => {
@@ -16,6 +18,17 @@ export function ConnectButton() {
   }
 
   if (isConnected) {
+    if (chainId !== sepolia.id) {
+      return (
+        <button 
+          onClick={() => switchChain({ chainId: sepolia.id })}
+          className="bg-destructive border border-destructive hover:brightness-110 text-background px-6 py-2 font-mono font-bold uppercase tracking-widest transition-colors shadow-[0_0_10px_#ff336640] cyber-chamfer-sm text-sm"
+        >
+          Switch to Sepolia
+        </button>
+      )
+    }
+
     return (
       <div className="flex items-center gap-4">
         <div className="bg-muted border border-border text-foreground px-4 py-2 text-sm font-mono uppercase tracking-widest cyber-chamfer-sm">
