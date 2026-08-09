@@ -1,0 +1,27 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: LiquidityPool
+    network: sepolia
+    source:
+      address: "0xCdbE1d3C84b069d3000C81F8CFA0DeBBeBB58359"
+      abi: LiquidityPool
+      startBlock: 6470000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SwapEvent
+        - PoolSnapshot
+      abis:
+        - name: LiquidityPool
+          file: ./abis/LiquidityPool.json
+      eventHandlers:
+        - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleSwap
+        - event: Sync(uint256,uint256)
+          handler: handleSync
+      file: ./src/mapping.ts

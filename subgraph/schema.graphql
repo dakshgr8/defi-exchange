@@ -1,0 +1,19 @@
+type SwapEvent @entity {
+  id: ID!
+  sender: Bytes!
+  amount0In: BigInt!
+  amount1In: BigInt!
+  amount0Out: BigInt!
+  amount1Out: BigInt!
+  crbPriceInUsdt: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type PoolSnapshot @entity {
+  id: ID!
+  reserve0: BigInt!
+  reserve1: BigInt!
+  crbPriceInUsdt: BigDecimal!
+  timestamp: BigInt!
+}
