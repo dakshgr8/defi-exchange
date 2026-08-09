@@ -664,33 +664,6 @@
       "type": "constructor"
     },
     {
-      "inputs": [],
-      "name": "ECDSAInvalidSignature",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "length",
-          "type": "uint256"
-        }
-      ],
-      "name": "ECDSAInvalidSignatureLength",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "ECDSAInvalidSignatureS",
-      "type": "error"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -777,11 +750,6 @@
       "type": "error"
     },
     {
-      "inputs": [],
-      "name": "InvalidShortString",
-      "type": "error"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -801,17 +769,6 @@
         }
       ],
       "name": "OwnableUnauthorizedAccount",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "str",
-          "type": "string"
-        }
-      ],
-      "name": "StringTooLong",
       "type": "error"
     },
     {
@@ -866,8 +823,58 @@
     },
     {
       "anonymous": false,
-      "inputs": [],
-      "name": "EIP712DomainChanged",
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountMinted",
+          "type": "uint256"
+        }
+      ],
+      "name": "ClaimProcessed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "proofUrl",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountRequested",
+          "type": "uint256"
+        }
+      ],
+      "name": "ClaimSubmitted",
       "type": "event"
     },
     {
@@ -912,6 +919,37 @@
         }
       ],
       "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "voteYes",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "weight",
+          "type": "uint256"
+        }
+      ],
+      "name": "Voted",
       "type": "event"
     },
     {
@@ -984,39 +1022,41 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "claims",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
           "internalType": "string",
-          "name": "certificateId",
+          "name": "proofUrl",
           "type": "string"
         },
         {
           "internalType": "uint256",
-          "name": "amount",
+          "name": "amountRequested",
           "type": "uint256"
         },
         {
-          "internalType": "bytes",
-          "name": "signature",
-          "type": "bytes"
-        }
-      ],
-      "name": "claim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
+          "internalType": "uint256",
+          "name": "yesVotes",
+          "type": "uint256"
+        },
         {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "name": "claimedCertificates",
-      "outputs": [
+          "internalType": "uint256",
+          "name": "noVotes",
+          "type": "uint256"
+        },
         {
           "internalType": "bool",
-          "name": "",
+          "name": "processed",
           "type": "bool"
         }
       ],
@@ -1037,43 +1077,24 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "eip712Domain",
-      "outputs": [
-        {
-          "internalType": "bytes1",
-          "name": "fields",
-          "type": "bytes1"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "version",
-          "type": "string"
-        },
+      "inputs": [
         {
           "internalType": "uint256",
-          "name": "chainId",
+          "name": "",
           "type": "uint256"
         },
         {
           "internalType": "address",
-          "name": "verifyingContract",
+          "name": "",
           "type": "address"
-        },
+        }
+      ],
+      "name": "hasVoted",
+      "outputs": [
         {
-          "internalType": "bytes32",
-          "name": "salt",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "extensions",
-          "type": "uint256[]"
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -1111,32 +1132,13 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "nonces",
+      "inputs": [],
+      "name": "nextClaimId",
       "outputs": [
         {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "oracleNode",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -1153,6 +1155,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        }
+      ],
+      "name": "processClaim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1183,12 +1198,17 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_oracleNode",
-          "type": "address"
+          "internalType": "string",
+          "name": "proofUrl",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountRequested",
+          "type": "uint256"
         }
       ],
-      "name": "setOracleNode",
+      "name": "submitClaim",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1281,6 +1301,24 @@
         }
       ],
       "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "voteYes",
+          "type": "bool"
+        }
+      ],
+      "name": "voteOnClaim",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

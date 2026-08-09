@@ -9,9 +9,10 @@ import { RemoveWidget } from "@/components/RemoveWidget"
 import { OffsetWidget } from "@/components/OffsetWidget"
 import { RetireWidget } from "@/components/RetireWidget"
 import { PriceChart } from "@/components/PriceChart"
+import { VerificationWidget } from "@/components/VerificationWidget"
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'swap' | 'liquidity' | 'remove' | 'offset' | 'retire'>('offset')
+  const [activeTab, setActiveTab] = useState<'swap' | 'liquidity' | 'remove' | 'offset' | 'retire' | 'verify'>('verify')
 
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col items-center">
@@ -108,6 +109,16 @@ export default function Dashboard() {
             >
               Remove
             </button>
+            <button
+              onClick={() => setActiveTab('verify')}
+              className={`flex-1 py-3 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-widest transition-all duration-200 cyber-chamfer-sm ${
+                activeTab === 'verify'
+                  ? 'bg-accent text-background shadow-[var(--box-shadow-neon-sm)]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              Verify
+            </button>
           </div>
 
           {/* The active widget */}
@@ -117,6 +128,7 @@ export default function Dashboard() {
             {activeTab === 'remove' && <RemoveWidget />}
             {activeTab === 'offset' && <OffsetWidget />}
             {activeTab === 'retire' && <RetireWidget />}
+            {activeTab === 'verify' && <VerificationWidget />}
           </div>
         </div>
       </div>
