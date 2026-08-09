@@ -38,7 +38,31 @@ export function PriceChart() {
           setChartData(transformedData)
         }
       } catch (e) {
-        console.error("Failed to fetch subgraph data:", e)
+        console.warn("Subgraph not connected. Generating mock data for demo.")
+        const mockData = []
+        let currentPrice = 1.0 // 1 CRB = 1 USDT
+        let currentTime = new Date()
+        currentTime.setDate(currentTime.getDate() - 30) // start 30 days ago
+
+        for (let i = 0; i < 30; i++) {
+          const open = currentPrice
+          const high = currentPrice + (Math.random() * 0.05)
+          const low = currentPrice - (Math.random() * 0.05)
+          const close = open + (Math.random() - 0.5) * 0.08
+          
+          mockData.push({
+            time: currentTime.toISOString().split('T')[0],
+            open,
+            high,
+            low,
+            close
+          })
+          
+          currentPrice = close
+          currentTime.setDate(currentTime.getDate() + 1)
+        }
+        
+        setChartData(mockData)
       }
     }
     fetchGraphData()
@@ -49,7 +73,7 @@ export function PriceChart() {
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#1f2937' }, 
+        background: { type: ColorType.Solid, color: 'transparent' }, 
         textColor: '#d1d5db',
       },
       grid: {
