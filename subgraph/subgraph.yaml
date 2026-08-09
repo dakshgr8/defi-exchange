@@ -6,7 +6,7 @@ dataSources:
     name: LiquidityPool
     network: sepolia
     source:
-      address: "0xCdbE1d3C84b069d3000C81F8CFA0DeBBeBB58359"
+      address: "0xDB47171d9d97A199691b0B95aC04A0499C7fFe1e"
       abi: LiquidityPool
       startBlock: 6470000
     mapping:
