@@ -6,9 +6,9 @@ dataSources:
     name: LiquidityPool
     network: sepolia
     source:
-      address: "0xDB47171d9d97A199691b0B95aC04A0499C7fFe1e"
+      address: "0xA4B9B7d23c7d7eB0315Fdd116AB6D8898B563e8E"
       abi: LiquidityPool
-      startBlock: 6470000
+      startBlock: 11451500
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
