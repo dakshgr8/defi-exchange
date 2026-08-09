@@ -205,8 +205,8 @@ export function VerificationWidget() {
                             <p className="font-mono text-sm text-foreground mb-4"><span className="text-primary">Requested:</span> {formatUnits(claim.amountRequested, 18)} CRB</p>
                             
                             <div className="flex gap-4 mb-4">
-                                <div className="text-green-500 font-bold font-mono">YES: {Number(formatUnits(claim.yesVotes, 18)).toFixed(2)}</div>
-                                <div className="text-red-500 font-bold font-mono">NO: {Number(formatUnits(claim.noVotes, 18)).toFixed(2)}</div>
+                                <div className="text-green-500 font-bold font-mono">✅ YES: {Number(formatUnits(claim.yesVotes, 18)).toLocaleString(undefined, {maximumFractionDigits: 0})} CRB</div>
+                                <div className="text-red-500 font-bold font-mono">❌ NO: {Number(formatUnits(claim.noVotes, 18)).toLocaleString(undefined, {maximumFractionDigits: 0})} CRB</div>
                             </div>
 
                             {!claim.processed && (
