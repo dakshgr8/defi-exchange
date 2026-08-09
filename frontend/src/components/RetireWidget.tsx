@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
-import { TOKENS } from '@/config/addresses'
+import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
 
 export function RetireWidget() {
@@ -12,8 +12,8 @@ export function RetireWidget() {
   const [retireNote, setRetireNote] = useState('Offsetting company flights')
 
   const { data: crbBalance, refetch: refetchBalance } = useReadContract({
-    address: TOKENS.CRB.address as `0x${string}`,
-    abi: abis.MockToken,
+    address: addresses.Carbon as `0x${string}`,
+    abi: (abis as any).MockToken,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
     query: { enabled: !!address }
@@ -29,8 +29,8 @@ export function RetireWidget() {
     if (!retireAmount || !address) return
     
     writeContract({
-      address: TOKENS.CRB.address as `0x${string}`,
-      abi: abis.MockToken as any,
+      address: addresses.Carbon as `0x${string}`,
+      abi: (abis as any).MockToken,
       functionName: 'retire',
       args: [parseUnits(retireAmount, 18), retireNote],
     })
