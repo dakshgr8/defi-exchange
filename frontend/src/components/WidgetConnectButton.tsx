@@ -1,6 +1,6 @@
 'use client'
 
-import { useAccount, useConnect, useSwitchChain } from 'wagmi'
+import { useAccount, useConnect, useSwitchChain, type Connector } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
 import { useState } from 'react'
 
@@ -14,21 +14,39 @@ export function WidgetConnectButton({ label = 'Connect Wallet', className }: Wid
   const { connectAsync, connectors, isPending } = useConnect()
   const { switchChain } = useSwitchChain()
   const [error, setError] = useState<string | null>(null)
+  const [showModal, setShowModal] = useState(false)
 
-  const handleConnect = async () => {
+  const handleConnect = async (selectedConnector?: Connector) => {
     setError(null)
-    const connector = connectors.find(c => c.id === 'metaMask') || connectors[0]
+    setShowModal(false)
 
-    if (!connector) {
-      if (typeof window !== 'undefined' && !(window as any).ethereum) {
-        window.open('https://metamask.io/download/', '_blank')
-        return
+    const hasWeb3Provider = typeof window !== 'undefined' && 
+      (Boolean((window as any).ethereum) || Boolean((window as any).okxwallet))
+
+    if (!hasWeb3Provider && connectors.length === 0) {
+      if (typeof window !== 'undefined') {
+        window.open('https://www.okx.com/web3', '_blank')
       }
+      return
     }
 
+    const connectorToUse = selectedConnector 
+      || connectors.find(c => c.id !== 'injected') 
+      || connectors.find(c => c.id === 'injected') 
+      || connectors[0]
+
     try {
-      if (connector) {
-        await connectAsync({ connector })
+      if (connectorToUse) {
+        await connectAsync({ connector: connectorToUse })
+      } else {
+        for (const c of connectors) {
+          try {
+            await connectAsync({ connector: c })
+            return
+          } catch (e) {
+            console.warn('Fallback connector failed:', c.name, e)
+          }
+        }
       }
     } catch (err: any) {
       console.error('Wallet connect error:', err)
@@ -37,6 +55,18 @@ export function WidgetConnectButton({ label = 'Connect Wallet', className }: Wid
       } else {
         setError(err?.shortMessage || err?.message || 'Connection failed')
       }
+    }
+  }
+
+  const handleButtonClick = () => {
+    const uniqueConnectors = connectors.filter((c, idx, self) => 
+      self.findIndex(t => t.id === c.id || t.name === c.name) === idx
+    )
+    
+    if (uniqueConnectors.length > 1) {
+      setShowModal(true)
+    } else {
+      handleConnect()
     }
   }
 
@@ -55,10 +85,10 @@ export function WidgetConnectButton({ label = 'Connect Wallet', className }: Wid
   const defaultStyle = "w-full bg-accent border-2 border-accent text-background py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer hover:brightness-110 shadow-[var(--box-shadow-neon-lg)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
 
   return (
-    <div className="w-full flex flex-col gap-1">
+    <div className="w-full flex flex-col gap-1 relative">
       <button
         type="button"
-        onClick={handleConnect}
+        onClick={handleButtonClick}
         disabled={isPending}
         className={className || defaultStyle}
       >
@@ -74,8 +104,50 @@ export function WidgetConnectButton({ label = 'Connect Wallet', className }: Wid
           label
         )}
       </button>
+
       {error && (
         <span className="text-xs font-mono text-destructive text-center tracking-tight mt-1">{error}</span>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+          <div className="bg-card border-2 border-accent p-6 rounded-xl max-w-sm w-full shadow-[var(--box-shadow-neon-lg)] flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-border pb-2">
+              <h3 className="font-sans font-bold text-lg text-foreground uppercase tracking-wider">Select Wallet</h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-muted-foreground hover:text-foreground font-mono font-bold text-lg px-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {connectors.map((c) => (
+                <button
+                  key={c.id || c.name}
+                  onClick={() => handleConnect(c)}
+                  className="w-full flex items-center gap-3 p-3 bg-muted hover:bg-accent/20 border border-border hover:border-accent rounded-lg text-left font-mono transition-all cursor-pointer"
+                >
+                  <span className="text-xl">
+                    {c.name.toLowerCase().includes('okx') ? '🖤' : c.name.toLowerCase().includes('metamask') ? '🦊' : '⚡'}
+                  </span>
+                  <div>
+                    <div className="font-bold text-foreground">{c.name}</div>
+                    <div className="text-[10px] text-muted-foreground">Connect via {c.name}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => handleConnect()}
+              className="w-full py-2 bg-transparent text-muted-foreground hover:text-foreground text-xs font-mono text-center uppercase tracking-widest border border-border rounded-lg mt-2 cursor-pointer"
+            >
+              Default Injected Wallet
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )
