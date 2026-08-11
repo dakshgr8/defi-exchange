@@ -5,6 +5,7 @@ import { useAccount, useWriteContract, usePublicClient } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '../config/addresses.json'
 import abis from '../config/abis.json'
+import { WidgetConnectButton } from '@/components/WidgetConnectButton'
 
 export function VerificationWidget() {
   const { isConnected, address: userAddress } = useAccount()
@@ -140,8 +141,10 @@ export function VerificationWidget() {
 
   if (!isConnected) {
     return (
-      <div className="w-full bg-input border border-border p-6 flex flex-col items-center justify-center space-y-4 cyber-chamfer-sm">
-        <p className="text-muted-foreground font-mono tracking-widest uppercase">Wallet Not Connected</p>
+      <div className="w-full bg-input border border-border p-8 flex flex-col items-center justify-center space-y-4 cyber-chamfer-sm max-w-md mx-auto">
+        <p className="text-muted-foreground font-mono tracking-widest uppercase text-sm">Wallet Not Connected</p>
+        <p className="text-xs text-muted-foreground text-center">Connect your Web3 wallet to access peer verification and DAO claims.</p>
+        <WidgetConnectButton />
       </div>
     )
   }

@@ -5,6 +5,7 @@ import { useAccount, useWriteContract, useReadContract, useWaitForTransactionRec
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
+import { WidgetConnectButton } from '@/components/WidgetConnectButton'
 
 export function RetireWidget() {
   const { isConnected, address } = useAccount()
@@ -88,9 +89,7 @@ export function RetireWidget() {
       </div>
 
       {!isConnected ? (
-        <button disabled className="w-full bg-muted border border-border text-muted-foreground py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer-sm">
-          Connect Wallet to Retire
-        </button>
+        <WidgetConnectButton label="Connect Wallet to Retire" />
       ) : (
         <button 
           onClick={handleRetire}

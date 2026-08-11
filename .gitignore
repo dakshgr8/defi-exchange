@@ -12,3 +12,4 @@ cache/
 out/
 build/
 .vercel
+.env*

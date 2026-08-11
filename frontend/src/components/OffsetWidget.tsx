@@ -6,6 +6,7 @@ import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
+import { WidgetConnectButton } from '@/components/WidgetConnectButton'
 
 const TOKENS = {
   CRB: { address: addresses.mockEthAddress as `0x${string}`, decimals: 18, symbol: 'CRB' }
@@ -195,13 +196,7 @@ export function OffsetWidget() {
       )}
 
       {!isConnected ? (
-        <button disabled className="w-full bg-muted border-2 border-border text-muted-foreground py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer">
-          Connect Wallet
-        </button>
-      ) : chainId !== sepolia.id ? (
-        <button disabled className="w-full bg-destructive/20 border-2 border-destructive text-destructive py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer">
-          Wrong Network
-        </button>
+        <WidgetConnectButton />
       ) : (
         <button 
           onClick={handleClaim}

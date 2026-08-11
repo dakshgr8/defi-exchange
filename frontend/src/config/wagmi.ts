@@ -1,12 +1,16 @@
 import { http, createConfig } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
-import { injected } from 'wagmi/connectors'
+import { injected, metaMask } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [sepolia],
-  connectors: [injected()],
+  connectors: [
+    injected(),
+    metaMask(),
+  ],
   transports: {
     [sepolia.id]: http('https://eth-sepolia.g.alchemy.com/v2/alch_huKnDWLOvkABori-v9Qjd'),
   },
   ssr: true,
 })
+

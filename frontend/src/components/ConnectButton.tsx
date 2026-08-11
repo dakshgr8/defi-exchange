@@ -7,16 +7,42 @@ import { useState, useEffect } from 'react'
 
 export function ConnectButton() {
   const [mounted, setMounted] = useState(false)
+  const [connectError, setConnectError] = useState<string | null>(null)
   
   useEffect(() => {
     setMounted(true)
   }, [])
 
   const { address, isConnected, chainId } = useAccount()
-  const { connect, connectors } = useConnect()
+  const { connectAsync, connectors, isPending } = useConnect()
   const { disconnect } = useDisconnect()
   const { switchChain } = useSwitchChain()
   const router = useRouter()
+
+  const handleConnect = async () => {
+    setConnectError(null)
+    const connector = connectors.find(c => c.id === 'metaMask') || connectors[0]
+    
+    if (!connector) {
+      if (typeof window !== 'undefined' && !(window as any).ethereum) {
+        window.open('https://metamask.io/download/', '_blank')
+        return
+      }
+    }
+
+    try {
+      if (connector) {
+        await connectAsync({ connector })
+      }
+    } catch (err: any) {
+      console.error('Wallet connection error:', err)
+      if (err?.code === 4001 || err?.name === 'UserRejectedRequestError') {
+        setConnectError('Connection request rejected')
+      } else {
+        setConnectError(err?.shortMessage || err?.message || 'Connection failed')
+      }
+    }
+  }
 
   const handleDisconnect = () => {
     disconnect()
@@ -61,25 +87,29 @@ export function ConnectButton() {
     )
   }
 
-  const connector = connectors[0]
-
-  if (!connector) {
-    return (
-      <button 
-        disabled
-        className="bg-accent/50 border border-accent/50 text-background/50 px-6 py-2 font-mono font-bold uppercase tracking-widest rounded-lg text-sm z-50 relative"
-      >
-        Initializing...
-      </button>
-    )
-  }
-
   return (
-    <button 
-      onClick={() => connect({ connector })}
-      className="bg-accent border border-accent hover:brightness-110 text-background px-6 py-2 font-mono font-bold uppercase tracking-widest transition-colors shadow-[var(--box-shadow-neon-sm)] rounded-lg text-sm cursor-pointer z-50 relative"
-    >
-      Connect Wallet
-    </button>
+    <div className="flex flex-col items-end gap-1 relative z-50">
+      <button 
+        onClick={handleConnect}
+        disabled={isPending}
+        className="bg-accent border border-accent hover:brightness-110 text-background px-6 py-2 font-mono font-bold uppercase tracking-widest transition-colors shadow-[var(--box-shadow-neon-sm)] rounded-lg text-sm cursor-pointer relative flex items-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+      >
+        {isPending ? (
+          <>
+            <svg className="animate-spin h-4 w-4 text-background" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Connecting...
+          </>
+        ) : (
+          'Connect Wallet'
+        )}
+      </button>
+      {connectError && (
+        <span className="text-[10px] font-mono text-destructive tracking-tight absolute top-full mt-1 right-0 whitespace-nowrap bg-background/90 px-2 py-0.5 rounded border border-destructive/50 z-50">{connectError}</span>
+      )}
+    </div>
   )
 }
+

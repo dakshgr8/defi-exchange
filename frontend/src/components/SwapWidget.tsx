@@ -5,6 +5,7 @@ import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionRe
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
+import { WidgetConnectButton } from '@/components/WidgetConnectButton'
 
 const TOKENS = {
   ETH: { address: addresses.mockEthAddress as `0x${string}`, decimals: 18, symbol: 'CRB', icon: '⚡' },
@@ -252,9 +253,7 @@ export function SwapWidget() {
       {/* Action Button */}
       <div className="mt-2">
         {!isConnected ? (
-          <button disabled className="w-full bg-muted border-2 border-border text-muted-foreground py-4 font-mono font-bold text-lg uppercase tracking-widest cyber-chamfer">
-            Connect Wallet
-          </button>
+          <WidgetConnectButton />
         ) : needsApproval ? (
           <button 
             onClick={handleApprove}
