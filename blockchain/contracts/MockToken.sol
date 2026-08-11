@@ -3,10 +3,15 @@ pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "hardhat/console.sol";
 
 contract MockToken is ERC20, Ownable {
-    
+    using ECDSA for bytes32;
+
+    mapping(address => uint256) public nonces;
+    mapping(string => bool) public usedCertificates;
+
     // ==========================================
     // DAO PEER-VERIFICATION WITH STAKING
     // ==========================================
@@ -37,6 +42,7 @@ contract MockToken is ERC20, Ownable {
     mapping(uint256 => address[]) private claimVoters;
 
     event CarbonRetired(address indexed user, uint256 amount, string note);
+    event CarbonClaimed(address indexed user, string certificateId, uint256 amount);
     event ClaimSubmitted(uint256 indexed claimId, address indexed user, string proofUrl, uint256 amountRequested, uint256 deadline);
     event Voted(uint256 indexed claimId, address indexed voter, bool voteYes, uint256 stakeAmount);
     event ClaimProcessed(uint256 indexed claimId, bool approved, uint256 amountMinted);
@@ -54,6 +60,45 @@ contract MockToken is ERC20, Ownable {
     function retire(uint256 amount, string memory note) public {
         _burn(msg.sender, amount);
         emit CarbonRetired(msg.sender, amount, note);
+    }
+
+    // EIP-712 Oracle Certificate Claiming
+    function claim(string memory certificateId, uint256 amount, bytes memory signature) public {
+        require(!usedCertificates[certificateId], "Certificate already claimed");
+        require(amount > 0, "Amount must be greater than 0");
+
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes("Carbon")),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(this)
+            )
+        );
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Claim(address user,string certificateId,uint256 amount,uint256 nonce)"),
+                msg.sender,
+                keccak256(bytes(certificateId)),
+                amount,
+                nonces[msg.sender]
+            )
+        );
+
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19\x01", domainSeparator, structHash)
+        );
+
+        address signer = ECDSA.recover(digest, signature);
+        require(signer == owner(), "Invalid oracle signature");
+
+        usedCertificates[certificateId] = true;
+        nonces[msg.sender]++;
+
+        _mint(msg.sender, amount);
+        emit CarbonClaimed(msg.sender, certificateId, amount);
     }
 
     // ==========================================
