@@ -2,7 +2,8 @@
 
 import { useAccount, useConnect, useSwitchChain, type Connector } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface WidgetConnectButtonProps {
   label?: string
@@ -10,6 +11,12 @@ interface WidgetConnectButtonProps {
 }
 
 export function WidgetConnectButton({ label = 'Connect Wallet', className }: WidgetConnectButtonProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { isConnected, chainId } = useAccount()
   const { connectAsync, connectors, isPending } = useConnect()
   const { switchChain } = useSwitchChain()
@@ -109,45 +116,50 @@ export function WidgetConnectButton({ label = 'Connect Wallet', className }: Wid
         <span className="text-xs font-mono text-destructive text-center tracking-tight mt-1">{error}</span>
       )}
 
-      {showModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-          <div className="bg-card border-2 border-accent p-6 rounded-xl max-w-sm w-full shadow-[var(--box-shadow-neon-lg)] flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-border pb-2">
-              <h3 className="font-sans font-bold text-lg text-foreground uppercase tracking-wider">Select Wallet</h3>
+      {showModal && mounted && createPortal(
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4 text-left font-sans">
+          <div className="bg-card border-2 border-accent p-6 rounded-xl max-w-sm w-full shadow-[var(--box-shadow-neon-lg)] flex flex-col gap-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-border/50 pb-3">
+              <div>
+                <h3 className="font-sans font-bold text-lg text-foreground uppercase tracking-wider">Select Wallet</h3>
+                <p className="text-xs text-muted-foreground font-mono">Connect your Web3 provider</p>
+              </div>
               <button 
                 onClick={() => setShowModal(false)}
-                className="text-muted-foreground hover:text-foreground font-mono font-bold text-lg px-2"
+                className="text-muted-foreground hover:text-foreground font-mono font-bold text-xl px-2 py-1 hover:bg-muted rounded-lg transition-colors cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5 my-1">
               {connectors.map((c) => (
                 <button
                   key={c.id || c.name}
                   onClick={() => handleConnect(c)}
-                  className="w-full flex items-center gap-3 p-3 bg-muted hover:bg-accent/20 border border-border hover:border-accent rounded-lg text-left font-mono transition-all cursor-pointer"
+                  className="w-full flex items-center gap-4 p-3.5 bg-muted/60 hover:bg-accent/15 border border-border hover:border-accent/50 rounded-xl font-mono transition-all cursor-pointer group"
                 >
-                  <span className="text-xl">
+                  <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-2xl border border-border group-hover:border-accent/40 shadow-sm">
                     {c.name.toLowerCase().includes('okx') ? '🖤' : c.name.toLowerCase().includes('metamask') ? '🦊' : '⚡'}
-                  </span>
-                  <div>
-                    <div className="font-bold text-foreground">{c.name}</div>
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-bold text-sm text-foreground group-hover:text-accent transition-colors">{c.name}</div>
                     <div className="text-[10px] text-muted-foreground">Connect via {c.name}</div>
                   </div>
+                  <div className="text-muted-foreground group-hover:text-accent font-mono text-xs">→</div>
                 </button>
               ))}
             </div>
 
             <button
               onClick={() => handleConnect()}
-              className="w-full py-2 bg-transparent text-muted-foreground hover:text-foreground text-xs font-mono text-center uppercase tracking-widest border border-border rounded-lg mt-2 cursor-pointer"
+              className="w-full py-2.5 bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-mono text-center uppercase tracking-widest border border-border/50 rounded-lg transition-colors cursor-pointer"
             >
-              Default Injected Wallet
+              Default Injected Provider
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
