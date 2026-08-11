@@ -70,7 +70,11 @@ export function RemoveWidget() {
         <h2 className="text-lg font-bold font-sans tracking-widest text-foreground uppercase">Remove Liquidity</h2>
       </div>
 
-      {!hasLiquidity ? (
+      {!isConnected ? (
+        <div className="py-4">
+          <WidgetConnectButton />
+        </div>
+      ) : !hasLiquidity ? (
         <div className="bg-muted p-8 text-center border border-border cyber-chamfer-sm">
           <p className="text-muted-foreground font-mono uppercase tracking-widest text-sm">No LP Tokens Found</p>
         </div>

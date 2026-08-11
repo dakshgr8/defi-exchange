@@ -58,30 +58,31 @@ export function VerificationWidget() {
           });
         }
         setClaims(fetchedClaims);
-
-        // Auto-finalize any claims past deadline
-        for (const c of fetchedClaims) {
-          if (!c.processed && c.deadline > 0 && now >= c.deadline && c.voterCount > 0) {
-            try {
-              const tx = await writeContractAsync({
-                address: (addresses as any).mockEthAddress,
-                abi: (abis as any).MockToken,
-                functionName: 'finalizeClaim',
-                args: [BigInt(c.id)]
-              })
-              await publicClient?.waitForTransactionReceipt({ hash: tx })
-              setMessage(`CLAIM #${c.id} AUTO-FINALIZED! Rewards distributed.`)
-            } catch (e) {
-              // Someone else may have already finalized it
-            }
-          }
-        }
       } catch (err) {
         console.error("Failed to fetch claims:", err);
       }
     };
     if (isConnected) fetchClaims();
   }, [isConnected, publicClient, message, now])
+
+  const handleFinalizeClaim = async (claimId: number) => {
+    setLoading(true)
+    setMessage(`FINALIZING CLAIM #${claimId}...`)
+    try {
+      const tx = await writeContractAsync({
+        address: (addresses as any).mockEthAddress,
+        abi: (abis as any).MockToken,
+        functionName: 'finalizeClaim',
+        args: [BigInt(claimId)]
+      })
+      await publicClient?.waitForTransactionReceipt({ hash: tx })
+      setMessage(`CLAIM #${claimId} FINALIZED! Rewards & stakes distributed.`)
+    } catch (err: any) {
+      const shortMsg = err?.shortMessage || err?.message || 'Finalization failed'
+      setMessage(`ERROR: ${shortMsg.substring(0, 100)}`)
+    }
+    setLoading(false)
+  }
 
   const handleSubmitClaim = async () => {
     if (!proofUrl || !requestAmount) {
@@ -216,20 +217,22 @@ export function VerificationWidget() {
                   </div>
                   <p className="font-mono text-xs text-muted-foreground mb-4">Voters: {Number(claim.voterCount)}</p>
 
-                  {now < claim.deadline && (
+                  {now < claim.deadline ? (
                     <div className="flex gap-2 flex-wrap">
                       <button onClick={() => handleVote(claim.id, true)} disabled={loading}
-                        className="bg-green-600 hover:bg-green-500 text-white font-bold font-mono tracking-widest uppercase py-2 px-4 border border-green-400 cyber-chamfer-sm transition-all text-xs">
+                        className="bg-green-600 hover:bg-green-500 text-white font-bold font-mono tracking-widest uppercase py-2 px-4 border border-green-400 cyber-chamfer-sm transition-all text-xs cursor-pointer">
                         STAKE YES
                       </button>
                       <button onClick={() => handleVote(claim.id, false)} disabled={loading}
-                        className="bg-red-600 hover:bg-red-500 text-white font-bold font-mono tracking-widest uppercase py-2 px-4 border border-red-400 cyber-chamfer-sm transition-all text-xs">
+                        className="bg-red-600 hover:bg-red-500 text-white font-bold font-mono tracking-widest uppercase py-2 px-4 border border-red-400 cyber-chamfer-sm transition-all text-xs cursor-pointer">
                         STAKE NO
                       </button>
                     </div>
-                  )}
-                  {now >= claim.deadline && (
-                    <p className="font-mono text-xs text-accent uppercase tracking-widest animate-pulse">Auto-finalizing when next user loads page...</p>
+                  ) : (
+                    <button onClick={() => handleFinalizeClaim(claim.id)} disabled={loading}
+                      className="bg-accent hover:brightness-110 text-background font-bold font-mono tracking-widest uppercase py-2 px-4 border border-accent cyber-chamfer-sm transition-all text-xs cursor-pointer shadow-[var(--box-shadow-neon-sm)]">
+                      {loading ? 'FINALIZING...' : 'FINALIZE CLAIM & DISTRIBUTE STAKES'}
+                    </button>
                   )}
                 </div>
               ))}

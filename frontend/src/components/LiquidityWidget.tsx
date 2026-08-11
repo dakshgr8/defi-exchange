@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
-import { parseUnits } from 'viem'
+import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
 import abis from '@/config/abis.json'
 import { WidgetConnectButton } from '@/components/WidgetConnectButton'
@@ -38,6 +38,22 @@ export function LiquidityWidget() {
     abi: abis.MockToken,
     functionName: 'allowance',
     args: [address, addresses.poolAddress],
+    query: { enabled: !!address }
+  })
+
+  const { data: balance0, refetch: refetchBalance0 } = useReadContract({
+    address: TOKENS.ETH.address,
+    abi: abis.MockToken,
+    functionName: 'balanceOf',
+    args: [address],
+    query: { enabled: !!address }
+  })
+
+  const { data: balance1, refetch: refetchBalance1 } = useReadContract({
+    address: TOKENS.USDC.address,
+    abi: abis.MockToken,
+    functionName: 'balanceOf',
+    args: [address],
     query: { enabled: !!address }
   })
 
@@ -78,8 +94,10 @@ export function LiquidityWidget() {
     if (isSuccAddLiq) {
       setAmount0('')
       setAmount1('')
+      refetchBalance0()
+      refetchBalance1()
     }
-  }, [isSuccAddLiq])
+  }, [isSuccAddLiq, refetchBalance0, refetchBalance1])
 
   const safeParseUnits = (val: string, decimals: number) => {
     try {
@@ -120,7 +138,12 @@ export function LiquidityWidget() {
       <div className="bg-input p-4 mb-2 border border-border focus-within:border-accent transition-all cyber-chamfer-sm">
         <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
           <span>Deposit Amount</span>
-          <span>BAL: {isConnected ? '1,000.00' : '0.00'}</span>
+          <span 
+            onClick={() => balance0 && handleAmount0Change(formatUnits(balance0 as bigint, TOKENS.ETH.decimals))}
+            className="cursor-pointer hover:text-accent transition"
+          >
+            BAL: {isConnected && balance0 ? Number(formatUnits(balance0 as bigint, TOKENS.ETH.decimals)).toFixed(2) : '0.00'}
+          </span>
         </div>
         <div className="flex justify-between items-center gap-4">
           <input
@@ -145,7 +168,12 @@ export function LiquidityWidget() {
       <div className="bg-input p-4 mb-6 border border-border focus-within:border-accent transition-all cyber-chamfer-sm">
         <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
           <span>Deposit Amount</span>
-          <span>BAL: {isConnected ? '500.00' : '0.00'}</span>
+          <span 
+            onClick={() => balance1 && handleAmount1Change(formatUnits(balance1 as bigint, TOKENS.USDC.decimals))}
+            className="cursor-pointer hover:text-accent transition"
+          >
+            BAL: {isConnected && balance1 ? Number(formatUnits(balance1 as bigint, TOKENS.USDC.decimals)).toFixed(2) : '0.00'}
+          </span>
         </div>
         <div className="flex justify-between items-center gap-4">
           <input

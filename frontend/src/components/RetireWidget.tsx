@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
 import addresses from '@/config/addresses.json'
@@ -26,21 +26,27 @@ export function RetireWidget() {
     hash,
   })
 
+  useEffect(() => {
+    if (isSuccess && retireAmount) {
+      setRetireAmount('')
+      refetchBalance()
+    }
+  }, [isSuccess, retireAmount, refetchBalance])
+
   const handleRetire = async () => {
     if (!retireAmount || !address) return
-    
-    writeContract({
-      address: (addresses as any).mockEthAddress as `0x${string}`,
-      abi: (abis as any).MockToken,
-      functionName: 'retire',
-      args: [parseUnits(retireAmount, 18), retireNote],
-    })
-  }
-
-  // Clear inputs on success
-  if (isSuccess && retireAmount) {
-    setRetireAmount('')
-    refetchBalance()
+    try {
+      const parsedAmount = parseUnits(retireAmount, 18)
+      if (parsedAmount <= 0n) return
+      writeContract({
+        address: (addresses as any).mockEthAddress as `0x${string}`,
+        abi: (abis as any).MockToken,
+        functionName: 'retire',
+        args: [parsedAmount, retireNote],
+      })
+    } catch (e) {
+      console.error('Invalid retire amount', e)
+    }
   }
 
   const isRetiring = isPending || isConfirming

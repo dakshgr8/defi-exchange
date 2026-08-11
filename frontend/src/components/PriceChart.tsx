@@ -25,9 +25,14 @@ const GET_SWAPS = gql`
 `
 
 export function PriceChart() {
+  const [mounted, setMounted] = useState(false)
   const [chartData, setChartData] = useState<any[]>([])
   const [currentPrice, setCurrentPrice] = useState('5.00')
   const [priceChange, setPriceChange] = useState('+0.00%')
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchGraphData = async () => {
@@ -87,7 +92,7 @@ export function PriceChart() {
       </div>
 
       {/* Chart */}
-      {chartData.length === 0 ? (
+      {!mounted || chartData.length === 0 ? (
         <div className="w-full h-[280px] sm:h-[320px] flex items-center justify-center">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>

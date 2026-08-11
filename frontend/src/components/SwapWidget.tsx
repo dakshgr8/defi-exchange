@@ -42,12 +42,28 @@ export function SwapWidget() {
     query: { enabled: !!address }
   })
 
+  const { data: tokenInBal, refetch: refetchTokenInBal } = useReadContract({
+    address: tokenIn.address,
+    abi: abis.MockToken,
+    functionName: 'balanceOf',
+    args: [address],
+    query: { enabled: !!address }
+  })
+
+  const { data: tokenOutBal, refetch: refetchTokenOutBal } = useReadContract({
+    address: tokenOut.address,
+    abi: abis.MockToken,
+    functionName: 'balanceOf',
+    args: [address],
+    query: { enabled: !!address }
+  })
+
   const reserve0 = reserves?.[0].result as bigint | undefined
   const reserve1 = reserves?.[1].result as bigint | undefined
 
   // 2. FRONTEND MATH
   useEffect(() => {
-    if (!inputAmount || isNaN(Number(inputAmount)) || !reserve0 || !reserve1) {
+    if (!inputAmount || isNaN(Number(inputAmount)) || !reserve0 || !reserve1 || reserve0 === 0n || reserve1 === 0n) {
       setOutputAmount('')
       return
     }
@@ -90,10 +106,20 @@ export function SwapWidget() {
       setOutputAmount('')
       refetchAllowance()
       refetchReserves()
+      refetchTokenInBal()
+      refetchTokenOutBal()
     }
-  }, [isSwapSuccess, refetchAllowance, refetchReserves])
+  }, [isSwapSuccess, refetchAllowance, refetchReserves, refetchTokenInBal, refetchTokenOutBal])
 
-  const parsedInput = inputAmount ? parseUnits(inputAmount, tokenIn.decimals) : 0n
+  const safeParseUnits = (val: string, decimals: number) => {
+    try {
+      return parseUnits(val, decimals)
+    } catch (e) {
+      return 0n
+    }
+  }
+
+  const parsedInput = inputAmount ? safeParseUnits(inputAmount, tokenIn.decimals) : 0n
   const needsApproval = allowance !== undefined && (allowance as bigint) < parsedInput
 
   const isApproving = isApprovingReq || isApprovingTx
@@ -184,7 +210,12 @@ export function SwapWidget() {
         <div className="absolute top-0 left-0 w-1 h-full bg-accent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
         <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
           <span>You Pay</span>
-          <span className="cursor-pointer hover:text-accent transition">BAL: {isConnected ? '1,000.00' : '0.00'}</span>
+          <span 
+            onClick={() => tokenInBal && setInputAmount(formatUnits(tokenInBal as bigint, tokenIn.decimals))}
+            className="cursor-pointer hover:text-accent transition"
+          >
+            BAL: {isConnected && tokenInBal ? Number(formatUnits(tokenInBal as bigint, tokenIn.decimals)).toFixed(2) : '0.00'}
+          </span>
         </div>
         <div className="flex justify-between items-center gap-4">
           <input
@@ -214,7 +245,7 @@ export function SwapWidget() {
       <div className="bg-input p-4 mb-6 border border-border transition-all cyber-chamfer-sm relative">
         <div className="flex justify-between text-xs font-mono text-muted-foreground mb-3 tracking-widest uppercase">
           <span>You Receive</span>
-          <span>BAL: {isConnected ? '500.00' : '0.00'}</span>
+          <span>BAL: {isConnected && tokenOutBal ? Number(formatUnits(tokenOutBal as bigint, tokenOut.decimals)).toFixed(2) : '0.00'}</span>
         </div>
         <div className="flex justify-between items-center gap-4">
           <input
